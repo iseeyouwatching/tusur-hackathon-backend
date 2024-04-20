@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hits.tusurhackathon.dto.CreateProposalDto;
-import ru.hits.tusurhackathon.dto.ProposalDto;
-import ru.hits.tusurhackathon.dto.ProposalInListDto;
-import ru.hits.tusurhackathon.dto.ProposalVoteDto;
+import ru.hits.tusurhackathon.dto.*;
 import ru.hits.tusurhackathon.service.ProposalService;
 
 import javax.validation.Valid;
@@ -28,12 +25,12 @@ public class ProposalController {
     private final ProposalService proposalService;
 
     @Operation(
-            summary = "Получить список предложений.",
+            summary = "Получить конкретное предложение.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    @GetMapping
-    public ResponseEntity<List<ProposalInListDto>> getProposals() {
-        return new ResponseEntity<>(proposalService.getProposals(), HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<ProposalInfoDto> getProposal(@PathVariable UUID id) {
+        return new ResponseEntity<>(proposalService.getProposal(id), HttpStatus.OK);
     }
 
     @Operation(
@@ -43,6 +40,16 @@ public class ProposalController {
     @PostMapping
     public ResponseEntity<ProposalDto> createProposal(@RequestBody @Valid CreateProposalDto createProposalDto) {
         return new ResponseEntity<>(proposalService.createProposal(createProposalDto), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Редактировать предложение.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PutMapping("/{id}")
+    public ResponseEntity<ProposalInfoDto> editProposal(@PathVariable("id") UUID id,
+                                                        @RequestBody @Valid EditProposalDto editProposalDto) {
+        return new ResponseEntity<>(proposalService.editProposal(id, editProposalDto), HttpStatus.OK);
     }
 
     @Operation(

@@ -17,4 +17,6 @@ public class CreateProposalDto {
 
     private UUID projectId;
 
+    private String jiraLink = null;
+
 }

@@ -14,8 +14,6 @@ public class UserInfoDto {
 
     private UUID id;
 
-    private String username;
-
     private String firstName;
 
     private String lastName;
@@ -24,16 +22,24 @@ public class UserInfoDto {
 
     private String phone;
 
-    private int avatarNumber;
+    private Integer avatarNumber;
 
     public UserInfoDto(UserEntity user) {
         this.id = user.getId();
-        this.username = user.getUsername();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.middleName = user.getMiddleName();
         this.phone = user.getPhone();
         this.avatarNumber = user.getAvatarNumber();
+    }
+
+    public UserInfoDto(UserInfoRequestDto userInfoRequestDto) {
+        this.id = UUID.randomUUID();
+        this.firstName = userInfoRequestDto.getName();
+        this.lastName = userInfoRequestDto.getSurname();
+        this.middleName = userInfoRequestDto.getPatronymic();
+        this.phone = userInfoRequestDto.getPhone();
+        this.avatarNumber = null;
     }
 
 }

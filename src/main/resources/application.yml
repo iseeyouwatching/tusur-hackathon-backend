@@ -41,8 +41,7 @@ app:
   security:
     jwt-token:
       permit-all:
-        - /api/bank-accounts/{id}/check-existence
-        - /api/bank-accounts/{id}/check-money
+        - /api/users/sign-in
       root-path: /api
       secret: TheVeryStrongKeyOrPasswordQwerty123
       issuer: tusur-hackathon-backend

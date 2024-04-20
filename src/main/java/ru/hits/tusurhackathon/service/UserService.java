@@ -2,20 +2,23 @@ package ru.hits.tusurhackathon.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hits.tusurhackathon.dto.ProposalInListDto;
-import ru.hits.tusurhackathon.dto.UserInfoDto;
+import org.springframework.web.client.RestTemplate;
+import ru.hits.tusurhackathon.dto.*;
 import ru.hits.tusurhackathon.entity.ProjectEntity;
 import ru.hits.tusurhackathon.entity.UserEntity;
 import ru.hits.tusurhackathon.exception.NotFoundException;
 import ru.hits.tusurhackathon.repository.ProjectRepository;
 import ru.hits.tusurhackathon.repository.UserRepository;
+import ru.hits.tusurhackathon.security.JWTUtil;
 import ru.hits.tusurhackathon.security.JwtUserData;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,7 +28,51 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+
     private final ProjectRepository projectRepository;
+
+    private final JWTUtil jwtUtil;
+
+    private static final String API_URL = "http://79.174.91.149/api/temp_token_auth";
+
+    public AccessTokenDto signIn(TempTokenDto tempTokenDto) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // Установка заголовков HTTP
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Создание объекта HttpEntity с телом запроса и заголовками
+        HttpEntity<TempTokenDto> requestEntity = new HttpEntity<>(tempTokenDto, headers);
+
+        // Отправка POST запроса и получение ответа
+        ResponseEntity<UserInfoRequestDto> responseEntity = restTemplate.exchange(
+                API_URL,
+                HttpMethod.POST,
+                requestEntity,
+                UserInfoRequestDto.class
+        );
+
+        // Получение тела ответа из ResponseEntity
+        UserInfoRequestDto userInfoRequestDto = responseEntity.getBody();
+
+        Optional<UserEntity> user = userRepository.findByPhone(userInfoRequestDto.getPhone());
+
+        if (user.isPresent()) {
+            return new AccessTokenDto(jwtUtil.generateToken(user.get().getId()));
+        } else {
+            UserEntity newUser = UserEntity.builder()
+                    .firstName(userInfoRequestDto.getName())
+                    .lastName(userInfoRequestDto.getSurname())
+                    .middleName(userInfoRequestDto.getPatronymic())
+                    .phone(userInfoRequestDto.getPhone())
+                    .build();
+
+            newUser = userRepository.save(newUser);
+
+            return new AccessTokenDto(jwtUtil.generateToken(newUser.getId()));
+        }
+    }
 
     public UserInfoDto getUserInfo() {
         UUID authenticatedUserId = getAuthenticatedUserId();

@@ -9,12 +9,12 @@ import lombok.*;
 @Setter
 public class EditProjectDto {
 
-    private String name;
+    private String name = null;
 
-    private String schedule;
+    private String schedule = null;
 
-    private Integer votesPerPeriod;
+    private Integer votesPerPeriod = null;
 
-    private Integer votesRefreshPeriodDays;
+    private Integer votesRefreshPeriodDays = null;
 
 }

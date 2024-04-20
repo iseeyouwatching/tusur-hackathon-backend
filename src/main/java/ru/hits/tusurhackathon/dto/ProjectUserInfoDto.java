@@ -14,8 +14,6 @@ public class ProjectUserInfoDto {
 
     private UUID id;
 
-    private String username;
-
     private String firstName;
 
     private String lastName;
@@ -24,15 +22,14 @@ public class ProjectUserInfoDto {
 
     private String phone;
 
-    private int avatarNumber;
+    private Integer avatarNumber;
 
-    private int availableVotes;
+    private Integer availableVotes;
 
     private Boolean isAdmin;
 
     public ProjectUserInfoDto(UserEntity user, Integer availableVotes, Boolean isAdmin) {
         this.id = user.getId();
-        this.username = user.getUsername();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.middleName = user.getMiddleName();

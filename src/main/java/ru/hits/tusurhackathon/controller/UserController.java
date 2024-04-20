@@ -8,10 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hits.tusurhackathon.dto.AccessTokenDto;
 import ru.hits.tusurhackathon.dto.ChangeAvatarDto;
+import ru.hits.tusurhackathon.dto.TempTokenDto;
 import ru.hits.tusurhackathon.dto.UserInfoDto;
 import ru.hits.tusurhackathon.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +26,14 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+
+    @Operation(
+            summary = "Вход в систему."
+    )
+    @PostMapping("/sign-in")
+    public ResponseEntity<AccessTokenDto> signIn(@RequestBody @Valid TempTokenDto tempTokenDto) {
+        return new ResponseEntity<>(userService.signIn(tempTokenDto), HttpStatus.OK);
+    }
 
     @Operation(
             summary = "Получить информацию о себе.",

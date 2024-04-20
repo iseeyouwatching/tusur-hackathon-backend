@@ -17,7 +17,7 @@ public class ProjectInListDto {
 
     private String name;
 
-    private int participantCount;
+    private Integer participantCount;
 
     private long createdAt;
 

@@ -11,6 +11,6 @@ import java.util.UUID;
 @Repository
 public interface ProposalRepository extends JpaRepository<ProposalEntity, UUID> {
 
-    List<ProposalEntity> findAllByOrderByVotesForDesc();
+    List<ProposalEntity> findAllByProject(ProjectEntity project);
 
 }

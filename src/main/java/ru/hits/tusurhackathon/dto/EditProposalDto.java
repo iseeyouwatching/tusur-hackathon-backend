@@ -7,8 +7,10 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ChangeAvatarDto {
+public class EditProposalDto {
 
-    private Integer avatarNumber;
+    private String text;
+
+    private String jiraLink;
 
 }

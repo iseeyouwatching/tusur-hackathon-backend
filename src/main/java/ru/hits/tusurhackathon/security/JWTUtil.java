@@ -41,7 +41,7 @@ public class JWTUtil {
      * @return сгенерированный JWT-токен.
      */
     public String generateToken(UUID id) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusYears(1).toInstant());
 
         String token = JWT.create()
                 .withSubject(subject)

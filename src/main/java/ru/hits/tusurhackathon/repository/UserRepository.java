@@ -6,10 +6,12 @@ import ru.hits.tusurhackathon.entity.ProjectEntity;
 import ru.hits.tusurhackathon.entity.UserEntity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
+    Optional<UserEntity> findByPhone(String phone);
 
 }

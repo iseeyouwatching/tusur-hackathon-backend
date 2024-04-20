@@ -6,18 +6,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hits.tusurhackathon.comparator.ProposalComparator;
 import ru.hits.tusurhackathon.dto.*;
-import ru.hits.tusurhackathon.entity.ProjectEntity;
-import ru.hits.tusurhackathon.entity.ProjectUserEntity;
-import ru.hits.tusurhackathon.entity.UserEntity;
+import ru.hits.tusurhackathon.entity.*;
 import ru.hits.tusurhackathon.exception.ForbiddenException;
 import ru.hits.tusurhackathon.exception.NotFoundException;
-import ru.hits.tusurhackathon.repository.ProjectRepository;
-import ru.hits.tusurhackathon.repository.ProjectUserRepository;
-import ru.hits.tusurhackathon.repository.UserRepository;
+import ru.hits.tusurhackathon.repository.*;
 import ru.hits.tusurhackathon.security.JwtUserData;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +29,34 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ProjectUserRepository projectUserRepository;
+    private final ProposalRepository proposalRepository;
+    private final UserVoteRepository userVoteRepository;
 
+    public List<ProposalInListDto> getProjectProposals(UUID projectId) {
+        UUID authenticatedUserId = getAuthenticatedUserId();
+        UserEntity user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + authenticatedUserId + " не существует"));
+
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Проект с ID " + projectId + " не найден"));
+
+        List<ProposalEntity> proposalEntities = proposalRepository.findAllByProject(project);
+
+        // Используем компаратор для сортировки предложений по общему количеству голосов "за" и "против"
+        proposalEntities.sort(new ProposalComparator());
+
+        List<ProposalInListDto> proposalInListDtos = new ArrayList<>();
+        for (ProposalEntity proposal: proposalEntities) {
+            Optional<UserVoteEntity> existingVote = userVoteRepository.findByUserAndProposal(user, proposal);
+            if (existingVote.isPresent()) {
+                proposalInListDtos.add(new ProposalInListDto(proposal, existingVote.get().getIsUpvote()));
+            } else {
+                proposalInListDtos.add(new ProposalInListDto(proposal, null));
+            }
+        }
+
+        return proposalInListDtos;
+    }
     public List<ProjectInListDto> getUserProjects() {
         UUID authenticatedUserId = getAuthenticatedUserId();
 

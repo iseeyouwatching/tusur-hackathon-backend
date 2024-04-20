@@ -7,8 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ChangeAvatarDto {
+public class AccessTokenDto {
 
-    private Integer avatarNumber;
+    private String accessToken;
 
 }

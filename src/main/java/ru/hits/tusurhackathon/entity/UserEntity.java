@@ -24,8 +24,6 @@ public class UserEntity {
     )
     private UUID id;
 
-    private String username;
-
     @Column(name = "first_name")
     private String firstName;
 

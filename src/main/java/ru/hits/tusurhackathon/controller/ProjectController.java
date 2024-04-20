@@ -25,6 +25,15 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @Operation(
+            summary = "Получить список предложений проекта.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/{projectId}/proposals")
+    public ResponseEntity<List<ProposalInListDto>> getProjectProposals(@PathVariable UUID projectId) {
+        return new ResponseEntity<>(projectService.getProjectProposals(projectId), HttpStatus.OK);
+    }
+
+    @Operation(
             summary = "Получить список проектов пользователя.",
             security = @SecurityRequirement(name = "bearerAuth")
     )

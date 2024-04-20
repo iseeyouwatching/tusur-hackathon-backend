@@ -31,6 +31,8 @@ public class UserVoteEntity {
     @JoinColumn(name = "proposal_id")
     private ProposalEntity proposal;
 
-    private boolean isUpvote; // Флаг, указывающий на то, был ли голос за предложение (true) или против (false)
+    private Boolean canBeVoiceCanceled;
+
+    private Boolean isUpvote; // Флаг, указывающий на то, был ли голос за предложение (true) или против (false)
 
 }

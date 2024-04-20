@@ -28,6 +28,9 @@ public class ProposalEntity {
 
     private String text;
 
+    @Column(name = "jira_link")
+    private String jiraLink;
+
     @Column(name = "votes_for")
     private Integer votesFor = 0; // Количество голосов ЗА предложение
 
