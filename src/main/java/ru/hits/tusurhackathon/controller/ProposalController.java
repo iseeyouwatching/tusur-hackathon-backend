@@ -57,8 +57,20 @@ public class ProposalController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{proposalId}/vote")
-    public ResponseEntity<Void> vote(@PathVariable UUID proposalId, @RequestBody @Valid ProposalVoteDto proposalVoteDto) {
+    public ResponseEntity<Void> vote(@PathVariable UUID proposalId,
+                                     @RequestBody @Valid ProposalVoteDto proposalVoteDto) {
         proposalService.voteForOrAgainstProposal(proposalId, proposalVoteDto.getIsUpvote());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Поменять статус предложения.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PutMapping("/{proposalId}/status")
+    public ResponseEntity<Void> changeProposalStatus(@PathVariable UUID proposalId,
+                                                     @RequestBody @Valid ChangeProposalStatusDto changeProposalStatusDto) {
+        proposalService.changeProposalStatus(proposalId, changeProposalStatusDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

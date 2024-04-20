@@ -10,6 +10,7 @@ import ru.hits.tusurhackathon.comparator.ProposalComparator;
 import ru.hits.tusurhackathon.dto.*;
 import ru.hits.tusurhackathon.entity.*;
 import ru.hits.tusurhackathon.enumeration.ProposalStatus;
+import ru.hits.tusurhackathon.exception.BadRequestException;
 import ru.hits.tusurhackathon.exception.ConflictException;
 import ru.hits.tusurhackathon.exception.ForbiddenException;
 import ru.hits.tusurhackathon.exception.NotFoundException;
@@ -17,6 +18,7 @@ import ru.hits.tusurhackathon.repository.*;
 import ru.hits.tusurhackathon.security.JwtUserData;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,10 +63,13 @@ public class ProposalService {
                     .proposalStatus(proposal.getProposalStatus())
                     .userVote(userVote) // Здесь нужно узнать голос пользователя и установить соответствующее значение
                     .canVote(canVote)
-                    .comments(comments)
+                    .comments(filterComments(comments.stream()
+                            .map(CommentDto::new)
+                            .collect(Collectors.toList())))
                     .jiraLink(proposal.getJiraLink())
 //                .draftComment(null) // Значение комментария-черновика необходимо получить из соответствующего поля предложения
                     .canBeVoteCanceled(existingVote.get().getCanBeVoiceCanceled()) // Значение canBeVoteCanceled можно установить, основываясь на каких-то условиях
+                    .createdAt(proposal.getCreatedAt().atZone(ZoneOffset.UTC).toInstant().toEpochMilli())
                     .build();
 
             return proposalInfoDto;
@@ -76,14 +81,27 @@ public class ProposalService {
                     .proposalStatus(proposal.getProposalStatus())
                     .userVote(null) // Здесь нужно узнать голос пользователя и установить соответствующее значение
                     .canVote(canVote)
-                    .comments(comments)
+                    .comments(filterComments(comments.stream()
+                            .map(CommentDto::new)
+                            .collect(Collectors.toList())))
                     .jiraLink(proposal.getJiraLink())
 //                .draftComment(null) // Значение комментария-черновика необходимо получить из соответствующего поля предложения
                     .canBeVoteCanceled(true) // Значение canBeVoteCanceled можно установить, основываясь на каких-то условиях
+                    .createdAt(proposal.getCreatedAt().atZone(ZoneOffset.UTC).toInstant().toEpochMilli())
                     .build();
 
             return proposalInfoDto;
         }
+    }
+
+    public List<CommentDto> filterComments(List<CommentDto> comments) {
+        List<CommentDto> filteredComments = new ArrayList<>();
+        for (CommentDto comment : comments) {
+            if (comment.getParentCommentId() == null) {
+                filteredComments.add(comment);
+            }
+        }
+        return filteredComments;
     }
 
     @Transactional
@@ -150,6 +168,51 @@ public class ProposalService {
         } else {
             return new ProposalInfoDto(proposal, null, canVote);
         }
+    }
+
+    @Transactional
+    public void changeProposalStatus(UUID proposalId, ChangeProposalStatusDto changeProposalStatusDto) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new NotFoundException("Предложение с ID " + proposalId + " не найдено"));
+
+        UUID authenticatedUserId = getAuthenticatedUserId();
+        UserEntity user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + authenticatedUserId + " не существует"));
+
+        // Проверка прав доступа аутентифицированного пользователя (админ проекта)
+        if (!hasAdminRights(proposal.getProject(), user)) {
+            throw new ForbiddenException("У вас нет прав для изменения статуса предложения");
+        }
+
+        // Проверка на допустимость изменения статуса предложения
+        if (!isStatusChangeAllowed(proposal.getProposalStatus(), changeProposalStatusDto.getProposalStatus())) {
+            throw new BadRequestException("Недопустимое изменение статуса предложения");
+        }
+
+        proposal.setProposalStatus(changeProposalStatusDto.getProposalStatus());
+        proposalRepository.save(proposal);
+    }
+
+    private boolean isStatusChangeAllowed(ProposalStatus currentStatus, ProposalStatus newStatus) {
+        // Проверка на допустимость изменения статуса предложения
+        switch (currentStatus) {
+            case NEW:
+                return newStatus == ProposalStatus.IN_PROGRESS || newStatus == ProposalStatus.REJECTED;
+            case IN_PROGRESS:
+                return newStatus == ProposalStatus.ACCEPTED || newStatus == ProposalStatus.REJECTED;
+            case ACCEPTED:
+                return newStatus == ProposalStatus.REJECTED;
+            case REJECTED:
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    private boolean hasAdminRights(ProjectEntity project, UserEntity user) {
+        Optional<ProjectUserEntity> projectUser = projectUserRepository.findByUserAndProject(user, project);
+
+        return projectUser.isPresent() && projectUser.get().getIsAdmin();
     }
 
     @Transactional

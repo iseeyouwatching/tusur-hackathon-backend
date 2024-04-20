@@ -8,10 +8,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.hits.tusurhackathon.dto.*;
+import ru.hits.tusurhackathon.entity.BlacklistTokenEntity;
 import ru.hits.tusurhackathon.entity.ProjectEntity;
 import ru.hits.tusurhackathon.entity.UserEntity;
 import ru.hits.tusurhackathon.exception.NotFoundException;
+import ru.hits.tusurhackathon.repository.BlacklistTokenRepository;
 import ru.hits.tusurhackathon.repository.ProjectRepository;
 import ru.hits.tusurhackathon.repository.UserRepository;
 import ru.hits.tusurhackathon.security.JWTUtil;
@@ -30,6 +34,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final ProjectRepository projectRepository;
+
+    private final BlacklistTokenRepository blacklistTokenRepository;
 
     private final JWTUtil jwtUtil;
 
@@ -72,6 +78,16 @@ public class UserService {
 
             return new AccessTokenDto(jwtUtil.generateToken(newUser.getId()));
         }
+    }
+
+    @Transactional
+    public void userLogOut() {
+        String bearerToken = getBearerTokenHeader().substring(7);
+
+        BlacklistTokenEntity blacklistToken = BlacklistTokenEntity.builder()
+                .token(bearerToken)
+                .build();
+        blacklistTokenRepository.save(blacklistToken);
     }
 
     public UserInfoDto getUserInfo() {
@@ -130,6 +146,10 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtUserData userData = (JwtUserData) authentication.getPrincipal();
         return userData.getId();
+    }
+
+    private static String getBearerTokenHeader() {
+        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getHeader("Authorization");
     }
 
 }

@@ -27,6 +27,9 @@ public class DraftEntity {
 
     private String content;
 
+    @Column(name = "jira_link")
+    private String jiraLink;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
@@ -37,6 +40,14 @@ public class DraftEntity {
     @ManyToOne
     @JoinColumn(name = "proposal_id")
     private ProposalEntity proposal;
+
+    @ManyToOne
+    @JoinColumn(name = "comment_id")
+    private CommentEntity comment;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private ProjectEntity project;
 
     @Column(name = "saved_at")
     private LocalDateTime savedAt;

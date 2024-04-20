@@ -8,6 +8,7 @@ import ru.hits.tusurhackathon.enumeration.ProposalStatus;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -33,7 +34,7 @@ public class ProposalInfoDto {
 
     private Boolean canBeVoteCanceled;
 
-    private List<CommentEntity> comments;
+    private List<CommentDto> comments;
 
     private long createdAt;
 
@@ -45,7 +46,9 @@ public class ProposalInfoDto {
         this.userVote = userVote;
         this.canVote = canVote;
         this.jiraLink = proposal.getJiraLink();
-        this.comments = proposal.getComments();
+        this.comments = proposal.getComments().stream()
+                .map(CommentDto::new)
+                .collect(Collectors.toList());
         this.createdAt = proposal.getCreatedAt().atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
     }
 

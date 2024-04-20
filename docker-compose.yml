@@ -22,4 +22,4 @@ services:
     environment:
       - POSTGRES_DB=tusur-hackathon-db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgre
+      - POSTGRES_PASSWORD=postgres

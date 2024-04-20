@@ -36,6 +36,16 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Логаут.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<Void> userLogOut() {
+        userService.userLogOut();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(
             summary = "Получить информацию о себе.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
