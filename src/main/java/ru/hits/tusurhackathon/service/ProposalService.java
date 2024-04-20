@@ -251,6 +251,7 @@ public class ProposalService {
                     .user(user)
                     .proposal(proposal)
                     .isUpvote(isUpvote)
+                    .canBeVoiceCanceled(true)
                     .build();
             userVoteRepository.save(userVote);
         }

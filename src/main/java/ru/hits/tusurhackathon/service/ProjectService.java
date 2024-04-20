@@ -15,10 +15,7 @@ import ru.hits.tusurhackathon.repository.*;
 import ru.hits.tusurhackathon.security.JwtUserData;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,6 +54,7 @@ public class ProjectService {
 
         return proposalInListDtos;
     }
+
     public List<ProjectInListDto> getUserProjects() {
         UUID authenticatedUserId = getAuthenticatedUserId();
 
