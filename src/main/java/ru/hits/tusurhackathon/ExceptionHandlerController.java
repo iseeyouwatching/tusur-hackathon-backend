@@ -156,7 +156,7 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
     ) {
         logError(request, exception);
         return new ResponseEntity<>(
-                new ApiError("Непредвиденная внутренняя ошибка сервера"),
+                new ApiError(exception.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
