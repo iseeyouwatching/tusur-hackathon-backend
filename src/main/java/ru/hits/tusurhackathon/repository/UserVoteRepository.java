@@ -17,4 +17,7 @@ public interface UserVoteRepository extends JpaRepository<UserVoteEntity, UUID> 
 
     List<UserVoteEntity> findAllByProposal(ProposalEntity proposal);
 
+    List<UserVoteEntity> findAllByProposalAndIsUpvote(ProposalEntity proposal, Boolean isUpvote);
+
+
 }

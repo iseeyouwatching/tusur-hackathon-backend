@@ -2,6 +2,7 @@ package ru.hits.tusurhackathon.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,19 @@ public class ProposalService {
         List<CommentEntity> comments = proposal.getComments();
 
         Optional<UserVoteEntity> existingVote = userVoteRepository.findByUserAndProposal(user, proposal);
+        List<UserVoteEntity> votedFor = userVoteRepository.findAllByProposalAndIsUpvote(proposal, true);
+        List<UserVoteEntity> votedAgainst = userVoteRepository.findAllByProposalAndIsUpvote(proposal, false);
+
+        List<UserInfoDto> usersVotedFor = new ArrayList<>();
+        for (UserVoteEntity voteFor: votedFor) {
+            usersVotedFor.add(new UserInfoDto(voteFor.getUser()));
+        }
+
+        List<UserInfoDto> usersVotedAgainst = new ArrayList<>();
+        for (UserVoteEntity voteAgainst: votedAgainst) {
+            usersVotedAgainst.add(new UserInfoDto(voteAgainst.getUser()));
+        }
+
         Boolean userVote;
         if (existingVote.isPresent()) {
             userVote = existingVote.get().getIsUpvote();
@@ -62,6 +76,8 @@ public class ProposalService {
                     .user(new UserInfoDto(proposal.getUser()))
                     .proposalStatus(proposal.getProposalStatus())
                     .userVote(userVote) // Здесь нужно узнать голос пользователя и установить соответствующее значение
+                    .usersVotedFor(usersVotedFor)
+                    .usersVotedAgainst(usersVotedAgainst)
                     .canVote(canVote)
                     .comments(filterComments(comments.stream()
                             .map(CommentDto::new)
@@ -80,6 +96,8 @@ public class ProposalService {
                     .user(new UserInfoDto(proposal.getUser()))
                     .proposalStatus(proposal.getProposalStatus())
                     .userVote(null) // Здесь нужно узнать голос пользователя и установить соответствующее значение
+                    .usersVotedFor(usersVotedFor)
+                    .usersVotedAgainst(usersVotedAgainst)
                     .canVote(canVote)
                     .comments(filterComments(comments.stream()
                             .map(CommentDto::new)

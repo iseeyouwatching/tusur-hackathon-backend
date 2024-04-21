@@ -2,9 +2,9 @@ server:
   port: 8080
 
 spring:
-#  flyway:
-#    locations: classpath:migrations
-#    enabled: true
+  flyway:
+    locations: classpath:migrations
+    enabled: true
   datasource:
     url: ${spring_datasource_url:jdbc:postgresql://localhost:5432/tusur-hackathon-db}
     username: ${spring_datasource_username:postgres}

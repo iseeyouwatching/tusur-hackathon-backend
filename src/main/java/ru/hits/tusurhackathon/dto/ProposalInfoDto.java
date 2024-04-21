@@ -28,6 +28,10 @@ public class ProposalInfoDto {
 
     private Boolean userVote;
 
+    private List<UserInfoDto> usersVotedFor;
+
+    private List<UserInfoDto> usersVotedAgainst;
+
     private Boolean canVote;
 
     private String jiraLink;
